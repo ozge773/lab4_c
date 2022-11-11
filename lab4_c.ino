@@ -3,6 +3,7 @@
 #include "ThingSpeak.h"
 #define PI 3.14
 
+float gyro_roll_prev = 0.0;
 // Thingspeak is initialized at the end of wifiSetup()
 // Writing to Thingspeak is to be implemented in part B
 
@@ -275,7 +276,8 @@ void printComplementary(){
   int decim = 1;
   //float gyro_roll = ((180/PI)*(g.x))+11;
   //float time = (0:decim:size(gyro_roll_vel,1)-1)/Fs;
-  float gyro_roll = gyro_roll + (gyro_roll_vel * dt);
+  float gyro_roll = gyro_roll_prev + (gyro_roll_vel * dt);
+  gyro_roll_prev = gyro_roll;
   //Sensor is biased and the error co
   //180 * atan2(accelX, sqrt(accelY*accelY + accelZ*accelZ))/PI;
   //Serial.print(dt);
@@ -297,12 +299,12 @@ void printComplementary(){
   float tau = 0.1;
   float alpha = tau / (tau +dt);
   float comp_roll = (alpha * gyro_roll )+ (1-alpha) * accell_roll;
+  float gyro = -1 * gyro_roll;
   //Serial.print(a.y);
-  //Serial.println("Gyroscope:");
-  //Serial.println(gyro_roll);
-  //Serial.println("Accelerometer:");
-  //Serial.println(accell_roll);
-  //Serial.println("Complementary roll:");
+  Serial.print(gyro);
+  Serial.print("\t");
+  Serial.print(accell_roll);
+  Serial.print("\t");
   Serial.println(comp_roll);
 
   //Serial.print(g.x);
@@ -314,15 +316,7 @@ void loop() {
   // Sets Accel, Gyro, Magno and BMP280 structs once per loop from most recent data.
   updateSensors();
 
-  // Print sensor outputs as a comma seperated list
-  //printInputCSV();
 
-  // Sensor Data is stored in C structs.
-  // IMU Sensors have a x,y and z component.
-  // The BMP280 has a temp_c, temp_f, and pressure_hp (in hectopascals)
-  // To access sensor values, call sensor_name.sensor_measurment
-  // Ex: accel.x, BMP280.pressure_p, magno.z
-  // For IMU temp, call imu_temp.temp_c or f
   printComplementary();
 
   // To not waste resources writing outputs constantly, feel free to change or remove!
